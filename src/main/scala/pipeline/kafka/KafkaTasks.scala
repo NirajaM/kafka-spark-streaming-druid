@@ -24,7 +24,7 @@ object KafkaTasks {
   def produce() = {
 
     val props = new Properties()
-    props.put("metadata.broker.list", "192.168.99.100:9092")
+    props.put("metadata.broker.list", "192.168.99.100:6092")
     props.put("value.serializer.class", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("key.serializer.class", "kafka.serializer.StringEncoder")
     props.put("producer.type", "sync")

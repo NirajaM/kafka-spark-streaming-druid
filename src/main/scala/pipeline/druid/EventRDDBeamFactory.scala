@@ -12,15 +12,19 @@ import com.metamx.tranquility.beam.ClusteredBeamTuning
 import com.metamx.common.Granularity
 import org.joda.time.Period
 
-class EventRDDBeamFactory extends BeamFactory[Map[String,String]] {
+class EventRDDBeamFactory extends BeamFactory[Map[String, String]] {
+  def makeBeam: Beam[Map[String, String]] = EventRDDBeamFactory.BeamInstance
+}
 
-  lazy val makeBeam: Beam[Map[String,String]] = {
+object EventRDDBeamFactory {
+
+  lazy val BeamInstance: Beam[Map[String,String]] = {
     val curator = CuratorFrameworkFactory.newClient(
-      "192.168.99.100:3181",
+      "192.168.99.100:9181",
       new BoundedExponentialBackoffRetry(100, 3000, 5))
     curator.start()
 
-    val indexService = "overlord" 
+    val indexService = "druid/overlord" 
     val discoveryPath = "/druid/discovery"
     
     val dataSource = "test"

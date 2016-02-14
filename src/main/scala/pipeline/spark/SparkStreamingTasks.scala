@@ -24,13 +24,11 @@ object SparkStreamingTasks {
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "pipeline.common.MyKyroRegistrator")
     val ssc = new StreamingContext(sparkConf, Seconds(10))
-    ssc.checkpoint("checkpoint")
 
     val kafkaConf = Map(
-      "metadata.broker.list" -> "192.168.99.100:9092",
+      "metadata.broker.list" -> "192.168.99.100:6092",
       "zookeeper.connect" -> "192.168.99.100:2181",
       "group.id" -> "test-spark-kafka-consumer",
-      "auto.offset.reset" -> "smallest",
       "zookeeper.connection.timeout.ms" -> "1000")
 
     val zkQuorum = "192.168.99.100:2181"
@@ -40,26 +38,23 @@ object SparkStreamingTasks {
     val lines = KafkaUtils.createDirectStream[Array[Byte], Array[Byte], DefaultDecoder, DefaultDecoder](ssc, kafkaConf, Set(topic))
     val rawStream = lines.map(_._2)
 
-    val deserialisedStream = rawStream map { stream => SerDeUtil.deserialiseEvent(stream) }
-    
-    val druidDStream = deserialisedStream map { kafkaEvent =>
+    val deserialisedDStream = rawStream map { stream => SerDeUtil.deserialiseEvent(stream) }
+
+    deserialisedDStream foreachRDD { kafkaEventRDD =>
       {
-        val eventFieldsMap = Map(
-          "ip" -> kafkaEvent.getIp(),
-          "website" -> kafkaEvent.getWebsite(),
-          "time" -> kafkaEvent.getTime())
-        eventFieldsMap
+        val druidEventRDD = kafkaEventRDD map { kafkaEvent =>
+          {
+            Map(
+              "ip" -> kafkaEvent.getIp(),
+              "website" -> kafkaEvent.getWebsite(),
+              "time" -> kafkaEvent.getTime())
+          }
+        }
+        
+        druidEventRDD.propagate(new EventRDDBeamFactory)
       }
     }
 
-    val beamFactory = new EventRDDBeamFactory()
-    druidDStream.foreach(rdd => {
-      println("In propogate")
-      println("In propogate : first")
-      println("First Map "+rdd.first())
-      rdd.propagate(beamFactory)
-    })
-    
     ssc.start()
     ssc.awaitTermination()
   }
