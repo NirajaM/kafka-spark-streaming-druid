@@ -10,9 +10,12 @@
 		<maven.assembly.version>2.4.1</maven.assembly.version>
 		<maven.surefire.version>2.6</maven.surefire.version>
 		<maven.jar.version>2.3.1</maven.jar.version>
-		<avro.maven.version>1.7.7</avro.maven.version>
 		<encoding>UTF-8</encoding>
 
+		<avro.maven.version>1.7.7</avro.maven.version>
+		<kafka.version>0.8.2.0</kafka.version>
+		<spark.version>1.6.0</spark.version>
+		
 		<scala.version>2.10.4</scala.version>
 		<scala.tools.version>2.15.0</scala.tools.version>
 	</properties>
@@ -56,26 +59,26 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.10</artifactId>
-			<version>0.8.2.0</version>
+			<version>${kafka.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
-			<version>1.7.7</version>
+			<version>${avro.maven.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming-kafka_2.10</artifactId>
-			<version>1.3.1</version>
+			<version>${spark.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.10</artifactId>
-			<version>1.3.1</version>
+			<version>${spark.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -89,7 +92,7 @@
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming_2.10</artifactId>
-			<version>1.3.1</version>
+			<version>${spark.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
