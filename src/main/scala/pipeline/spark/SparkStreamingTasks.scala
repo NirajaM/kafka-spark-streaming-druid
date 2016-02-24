@@ -26,12 +26,12 @@ object SparkStreamingTasks {
     val ssc = new StreamingContext(sparkConf, Seconds(10))
 
     val kafkaConf = Map(
-      "metadata.broker.list" -> "192.168.99.100:6092",
-      "zookeeper.connect" -> "192.168.99.100:2181",
+      "metadata.broker.list" -> "kafka:9092",
+      "zookeeper.connect" -> "kafka:2181",
       "group.id" -> "test-spark-kafka-consumer",
       "zookeeper.connection.timeout.ms" -> "1000")
 
-    val zkQuorum = "192.168.99.100:2181"
+    val zkQuorum = "kafka:2181"
     val group = "test-spark-kafka-consumer"
     val topic = "test"
 
@@ -47,7 +47,7 @@ object SparkStreamingTasks {
             Map(
               "ip" -> kafkaEvent.getIp(),
               "website" -> kafkaEvent.getWebsite(),
-              "time" -> kafkaEvent.getTime())
+              "timestamp" -> kafkaEvent.getTime())
           }
         }
         

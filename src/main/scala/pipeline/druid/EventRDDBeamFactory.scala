@@ -20,7 +20,7 @@ object EventRDDBeamFactory {
 
   lazy val BeamInstance: Beam[Map[String,String]] = {
     val curator = CuratorFrameworkFactory.newClient(
-      "192.168.99.100:9181",
+      "druid:2181",
       new BoundedExponentialBackoffRetry(100, 3000, 5))
     curator.start()
 
@@ -28,17 +28,17 @@ object EventRDDBeamFactory {
     val discoveryPath = "/druid/discovery"
     
     val dataSource = "test"
-    val dimensions = IndexedSeq("ip")
+    val dimensionExclusions = IndexedSeq("timestamp")
     val aggregators = Seq(new CountAggregatorFactory("website"))
-    
-    val timestampFn = (message: Map[String,String]) => new DateTime(message.get("time").get)
+
+    val timestampFn = (message: Map[String, String]) => new DateTime(message.get("timestamp").get)
     
     DruidBeams
       .builder(timestampFn)
       .curator(curator)
       .discoveryPath(discoveryPath)
       .location(DruidLocation.create(indexService, dataSource))
-      .rollup(DruidRollup(SpecificDruidDimensions(dimensions), aggregators, QueryGranularity.MINUTE))
+      .rollup(DruidRollup(SchemalessDruidDimensions(dimensionExclusions), aggregators, QueryGranularity.MINUTE))
       .tuning(
         ClusteredBeamTuning(
           segmentGranularity = Granularity.HOUR,

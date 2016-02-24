@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import pipeline.model.avro.KafkaEvent
 import pipeline.common.SerDeUtil
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
 object KafkaTasks {
   
@@ -24,7 +25,7 @@ object KafkaTasks {
   def produce() = {
 
     val props = new Properties()
-    props.put("metadata.broker.list", "192.168.99.100:6092")
+    props.put("metadata.broker.list", "10.24.48.147:6092")
     props.put("value.serializer.class", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("key.serializer.class", "kafka.serializer.StringEncoder")
     props.put("producer.type", "sync")
@@ -34,8 +35,8 @@ object KafkaTasks {
 
     val rnd = new Random()
 
-    for (i <- Range(1, 10)) {
-      val runtime = DateTime.now().toString()
+    for (i <- Range(1, 10000)) {
+      val runtime = DateTime.now().toString(ISODateTimeFormat.dateTime())
       val ip = "192.168.2." + rnd.nextInt(255);
       val website = "www.example.com/" + rnd.nextInt(2);
 
@@ -49,7 +50,7 @@ object KafkaTasks {
       val data = new KeyedMessage[String, Array[Byte]]("test", ip, SerDeUtil.serializeEvent(kafkaEvent))
       producer.send(data)
       
-      Thread.sleep(100)
+      Thread.sleep(1000)
     }
 
     producer.close()
@@ -58,7 +59,7 @@ object KafkaTasks {
   def consume() = {
     
     val props = new Properties()
-    props.put("zookeeper.connect", "192.168.99.100:2181");
+    props.put("zookeeper.connect", "10.24.48.147:2181");
     props.put("group.id", "test-consumer");
     props.put("zookeeper.session.timeout.ms", "4000");
     props.put("zookeeper.sync.time.ms", "200");
