@@ -7,11 +7,9 @@ package pipeline.model.avro;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KafkaEvent\",\"namespace\":\"pipeline.model.avro\",\"fields\":[{\"name\":\"ip\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"website\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"time\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KafkaEvent\",\"namespace\":\"pipeline.model.avro\",\"fields\":[{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"avro.java.string\":\"String\"}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-  @Deprecated public java.lang.String ip;
-  @Deprecated public java.lang.String website;
-  @Deprecated public java.lang.String time;
+  @Deprecated public java.util.Map<java.lang.String,java.lang.String> data;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -23,19 +21,15 @@ public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * All-args constructor.
    */
-  public KafkaEvent(java.lang.String ip, java.lang.String website, java.lang.String time) {
-    this.ip = ip;
-    this.website = website;
-    this.time = time;
+  public KafkaEvent(java.util.Map<java.lang.String,java.lang.String> data) {
+    this.data = data;
   }
 
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return ip;
-    case 1: return website;
-    case 2: return time;
+    case 0: return data;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -43,56 +37,24 @@ public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: ip = (java.lang.String)value$; break;
-    case 1: website = (java.lang.String)value$; break;
-    case 2: time = (java.lang.String)value$; break;
+    case 0: data = (java.util.Map<java.lang.String,java.lang.String>)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
   /**
-   * Gets the value of the 'ip' field.
+   * Gets the value of the 'data' field.
    */
-  public java.lang.String getIp() {
-    return ip;
+  public java.util.Map<java.lang.String,java.lang.String> getData() {
+    return data;
   }
 
   /**
-   * Sets the value of the 'ip' field.
+   * Sets the value of the 'data' field.
    * @param value the value to set.
    */
-  public void setIp(java.lang.String value) {
-    this.ip = value;
-  }
-
-  /**
-   * Gets the value of the 'website' field.
-   */
-  public java.lang.String getWebsite() {
-    return website;
-  }
-
-  /**
-   * Sets the value of the 'website' field.
-   * @param value the value to set.
-   */
-  public void setWebsite(java.lang.String value) {
-    this.website = value;
-  }
-
-  /**
-   * Gets the value of the 'time' field.
-   */
-  public java.lang.String getTime() {
-    return time;
-  }
-
-  /**
-   * Sets the value of the 'time' field.
-   * @param value the value to set.
-   */
-  public void setTime(java.lang.String value) {
-    this.time = value;
+  public void setData(java.util.Map<java.lang.String,java.lang.String> value) {
+    this.data = value;
   }
 
   /** Creates a new KafkaEvent RecordBuilder */
@@ -116,9 +78,7 @@ public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase impl
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<KafkaEvent>
     implements org.apache.avro.data.RecordBuilder<KafkaEvent> {
 
-    private java.lang.String ip;
-    private java.lang.String website;
-    private java.lang.String time;
+    private java.util.Map<java.lang.String,java.lang.String> data;
 
     /** Creates a new Builder */
     private Builder() {
@@ -128,109 +88,43 @@ public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase impl
     /** Creates a Builder by copying an existing Builder */
     private Builder(pipeline.model.avro.KafkaEvent.Builder other) {
       super(other);
-      if (isValidValue(fields()[0], other.ip)) {
-        this.ip = data().deepCopy(fields()[0].schema(), other.ip);
+      if (isValidValue(fields()[0], other.data)) {
+        this.data = data().deepCopy(fields()[0].schema(), other.data);
         fieldSetFlags()[0] = true;
-      }
-      if (isValidValue(fields()[1], other.website)) {
-        this.website = data().deepCopy(fields()[1].schema(), other.website);
-        fieldSetFlags()[1] = true;
-      }
-      if (isValidValue(fields()[2], other.time)) {
-        this.time = data().deepCopy(fields()[2].schema(), other.time);
-        fieldSetFlags()[2] = true;
       }
     }
     
     /** Creates a Builder by copying an existing KafkaEvent instance */
     private Builder(pipeline.model.avro.KafkaEvent other) {
             super(pipeline.model.avro.KafkaEvent.SCHEMA$);
-      if (isValidValue(fields()[0], other.ip)) {
-        this.ip = data().deepCopy(fields()[0].schema(), other.ip);
+      if (isValidValue(fields()[0], other.data)) {
+        this.data = data().deepCopy(fields()[0].schema(), other.data);
         fieldSetFlags()[0] = true;
-      }
-      if (isValidValue(fields()[1], other.website)) {
-        this.website = data().deepCopy(fields()[1].schema(), other.website);
-        fieldSetFlags()[1] = true;
-      }
-      if (isValidValue(fields()[2], other.time)) {
-        this.time = data().deepCopy(fields()[2].schema(), other.time);
-        fieldSetFlags()[2] = true;
       }
     }
 
-    /** Gets the value of the 'ip' field */
-    public java.lang.String getIp() {
-      return ip;
+    /** Gets the value of the 'data' field */
+    public java.util.Map<java.lang.String,java.lang.String> getData() {
+      return data;
     }
     
-    /** Sets the value of the 'ip' field */
-    public pipeline.model.avro.KafkaEvent.Builder setIp(java.lang.String value) {
+    /** Sets the value of the 'data' field */
+    public pipeline.model.avro.KafkaEvent.Builder setData(java.util.Map<java.lang.String,java.lang.String> value) {
       validate(fields()[0], value);
-      this.ip = value;
+      this.data = value;
       fieldSetFlags()[0] = true;
       return this; 
     }
     
-    /** Checks whether the 'ip' field has been set */
-    public boolean hasIp() {
+    /** Checks whether the 'data' field has been set */
+    public boolean hasData() {
       return fieldSetFlags()[0];
     }
     
-    /** Clears the value of the 'ip' field */
-    public pipeline.model.avro.KafkaEvent.Builder clearIp() {
-      ip = null;
+    /** Clears the value of the 'data' field */
+    public pipeline.model.avro.KafkaEvent.Builder clearData() {
+      data = null;
       fieldSetFlags()[0] = false;
-      return this;
-    }
-
-    /** Gets the value of the 'website' field */
-    public java.lang.String getWebsite() {
-      return website;
-    }
-    
-    /** Sets the value of the 'website' field */
-    public pipeline.model.avro.KafkaEvent.Builder setWebsite(java.lang.String value) {
-      validate(fields()[1], value);
-      this.website = value;
-      fieldSetFlags()[1] = true;
-      return this; 
-    }
-    
-    /** Checks whether the 'website' field has been set */
-    public boolean hasWebsite() {
-      return fieldSetFlags()[1];
-    }
-    
-    /** Clears the value of the 'website' field */
-    public pipeline.model.avro.KafkaEvent.Builder clearWebsite() {
-      website = null;
-      fieldSetFlags()[1] = false;
-      return this;
-    }
-
-    /** Gets the value of the 'time' field */
-    public java.lang.String getTime() {
-      return time;
-    }
-    
-    /** Sets the value of the 'time' field */
-    public pipeline.model.avro.KafkaEvent.Builder setTime(java.lang.String value) {
-      validate(fields()[2], value);
-      this.time = value;
-      fieldSetFlags()[2] = true;
-      return this; 
-    }
-    
-    /** Checks whether the 'time' field has been set */
-    public boolean hasTime() {
-      return fieldSetFlags()[2];
-    }
-    
-    /** Clears the value of the 'time' field */
-    public pipeline.model.avro.KafkaEvent.Builder clearTime() {
-      time = null;
-      fieldSetFlags()[2] = false;
       return this;
     }
 
@@ -238,9 +132,7 @@ public class KafkaEvent extends org.apache.avro.specific.SpecificRecordBase impl
     public KafkaEvent build() {
       try {
         KafkaEvent record = new KafkaEvent();
-        record.ip = fieldSetFlags()[0] ? this.ip : (java.lang.String) defaultValue(fields()[0]);
-        record.website = fieldSetFlags()[1] ? this.website : (java.lang.String) defaultValue(fields()[1]);
-        record.time = fieldSetFlags()[2] ? this.time : (java.lang.String) defaultValue(fields()[2]);
+        record.data = fieldSetFlags()[0] ? this.data : (java.util.Map<java.lang.String,java.lang.String>) defaultValue(fields()[0]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

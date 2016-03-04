@@ -15,7 +15,7 @@
 		<avro.maven.version>1.7.7</avro.maven.version>
 		<kafka.version>0.8.2.0</kafka.version>
 		<spark.version>1.6.0</spark.version>
-		
+
 		<scala.version>2.10.4</scala.version>
 		<scala.tools.version>2.15.0</scala.tools.version>
 	</properties>
@@ -108,6 +108,13 @@
 			<version>2.9.2</version>
 		</dependency>
 
+		<!-- YAML Parsing -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>2.4.4</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

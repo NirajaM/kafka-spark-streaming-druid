@@ -2,8 +2,12 @@
  "type": "record",
  "name": "KafkaEvent",
  "fields": [
-     {"name": "ip", "type": "string"},
-     {"name": "website",  "type": "string"},
-     {"name": "time", "type": "string"}
- ]
+    {
+     "name": "data",
+     "type":{
+        "type": "map",
+        "values": "string"
+      }
+    }
+  ]
 }

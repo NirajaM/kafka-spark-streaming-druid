@@ -14,48 +14,70 @@ import scala.collection.immutable.Map
 import pipeline.model.avro.KafkaEvent
 import org.apache.spark.rdd.RDD
 import pipeline.druid.EventRDDBeamFactory
+import java.util.HashMap
+import scala.collection.JavaConversions._
+import pipeline.config.InputConfig
+import pipeline.config.InputConfig
+import org.apache.spark.streaming.dstream.DStream
+import pipeline.druid.EventRDDBeamFactory
+import org.apache.spark.SparkContext
 
 object SparkStreamingTasks {
 
-  def streamFromKafka() = {
+  def startSparkContext(config: InputConfig) = {
+    StreamingContext.getOrCreate(config.SPARK.CHECKPOINT, () => createSparkStreamingContext(config))
+  }
+  
+  def createSparkStreamingContext(config: InputConfig) = {
+    
     val sparkConf = new SparkConf()
-      .setAppName("test-spark")
-      .setMaster("yarn-client")
+      .setAppName(config.SPARK.APPNAME)
+      .setMaster(config.SPARK.MASTER)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", "pipeline.common.MyKyroRegistrator")
-    val ssc = new StreamingContext(sparkConf, Seconds(10))
+      
+    val sparkContext = new SparkContext(sparkConf)
+    val sparkStreamingContext = new StreamingContext(sparkContext, Seconds(config.SPARK.DURATION_S))
+    sparkStreamingContext.checkpoint(config.SPARK.CHECKPOINT)
+    
+    val dStream = getStreamFromKafka(sparkStreamingContext, config)
+    val deserialisedDStream = deserialiseAvroObjectFromStream(dStream)
+    processDStream(deserialisedDStream, config)
 
-    val kafkaConf = Map(
-      "metadata.broker.list" -> "kafka:9092",
-      "zookeeper.connect" -> "kafka:2181",
-      "group.id" -> "test-spark-kafka-consumer",
-      "zookeeper.connection.timeout.ms" -> "1000")
+    sparkStreamingContext
+  }
+  
+  def getStreamFromKafka(ssc: StreamingContext, config: InputConfig) = {
 
-    val zkQuorum = "kafka:2181"
-    val group = "test-spark-kafka-consumer"
-    val topic = "test"
+    val KAFKA_CONF = new HashMap[String,String]
+    KAFKA_CONF.put("metadata.broker.list", config.KAFKA.BROKER)
+    KAFKA_CONF.put("zookeeper.connect", config.ZOOKEEPER)
+    KAFKA_CONF.put("group.id", config.SPARK.KAFKA.GROUP)
 
-    val lines = KafkaUtils.createDirectStream[Array[Byte], Array[Byte], DefaultDecoder, DefaultDecoder](ssc, kafkaConf, Set(topic))
-    val rawStream = lines.map(_._2)
+    config.SPARK.KAFKA.PROPERTIES.toList.foreach(property => KAFKA_CONF.put(property.PROPERTY, property.VALUE))
 
-    val deserialisedDStream = rawStream map { stream => SerDeUtil.deserialiseEvent(stream) }
-
-    deserialisedDStream foreachRDD { kafkaEventRDD =>
-      {
+    val lines = KafkaUtils.createDirectStream[Array[Byte], Array[Byte], DefaultDecoder, DefaultDecoder](ssc, KAFKA_CONF.toMap, Set(config.KAFKA.TOPIC))
+    val raw = lines.map(_._2)
+    raw
+  }
+  
+  def deserialiseAvroObjectFromStream(dStream: DStream[Array[Byte]]) = {
+    dStream.map(byteStream => SerDeUtil.deserialiseEvent(byteStream))
+  }
+  
+  def processDStream(dStream: DStream[KafkaEvent], config: InputConfig) = {
+    
+    dStream foreachRDD { kafkaEventRDD =>
+      { 
         val druidEventRDD = kafkaEventRDD map { kafkaEvent =>
           {
-            Map(
-              "ip" -> kafkaEvent.getIp(),
-              "website" -> kafkaEvent.getWebsite(),
-              "timestamp" -> kafkaEvent.getTime())
+            kafkaEvent.getData().toMap
           }
         }
         
-        druidEventRDD.propagate(new EventRDDBeamFactory)
+        druidEventRDD.propagate(new EventRDDBeamFactory(config))
       }
     }
-
-    ssc.start()
-    ssc.awaitTermination()
+    
   }
 }

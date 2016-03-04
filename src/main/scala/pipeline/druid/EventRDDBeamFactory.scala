@@ -11,42 +11,32 @@ import io.druid.granularity.QueryGranularity
 import com.metamx.tranquility.beam.ClusteredBeamTuning
 import com.metamx.common.Granularity
 import org.joda.time.Period
+import pipeline.config.InputConfig
 
-class EventRDDBeamFactory extends BeamFactory[Map[String, String]] {
-  def makeBeam: Beam[Map[String, String]] = EventRDDBeamFactory.BeamInstance
-}
-
-object EventRDDBeamFactory {
-
-  lazy val BeamInstance: Beam[Map[String,String]] = {
+class EventRDDBeamFactory(config: InputConfig) extends BeamFactory[Map[String, String]] {
+  
+  lazy val makeBeam: Beam[Map[String, String]] = {
     val curator = CuratorFrameworkFactory.newClient(
-      "druid:2181",
-      new BoundedExponentialBackoffRetry(100, 3000, 5))
+      config.DRUID.ZOOKEEPER,
+      new BoundedExponentialBackoffRetry(config.DRUID.CURATOR_RETRY.BASE_SLEEP_MS, config.DRUID.CURATOR_RETRY.MAX_SLEEP_MS, config.DRUID.CURATOR_RETRY.RETRIES))
     curator.start()
 
-    val indexService = "druid/overlord" 
-    val discoveryPath = "/druid/discovery"
-    
-    val dataSource = "test"
-    val dimensionExclusions = IndexedSeq("timestamp")
-    val aggregators = Seq(new CountAggregatorFactory("website"))
+    val aggregators = config.DRUID.ROLLUP.getAggregatorsSeq()
+    val dimensionExclusions = config.DRUID.ROLLUP.getDimensionExclusionsSeq()
+    val timestampFn = (message: Map[String, String]) => new DateTime(message.get(config.DRUID.TIMESTAMP_DIMENSION).get)
 
-    val timestampFn = (message: Map[String, String]) => new DateTime(message.get("timestamp").get)
-    
     DruidBeams
       .builder(timestampFn)
       .curator(curator)
-      .discoveryPath(discoveryPath)
-      .location(DruidLocation.create(indexService, dataSource))
-      .rollup(DruidRollup(SchemalessDruidDimensions(dimensionExclusions), aggregators, QueryGranularity.MINUTE))
-      .tuning(
-        ClusteredBeamTuning(
-          segmentGranularity = Granularity.HOUR,
-          windowPeriod = new Period("PT10M"),
-          partitions = 1,
-          replicants = 1
-        )
-      )
+      .discoveryPath(config.DRUID.DISCOVERY)
+      .location(DruidLocation.create(config.DRUID.INDEXER, config.DRUID.DATASOURCE))
+      .rollup(DruidRollup(SchemalessDruidDimensions(dimensionExclusions), aggregators, config.DRUID.ROLLUP.getQueryGranularity()))
+      .tuning(ClusteredBeamTuning(
+        segmentGranularity = config.DRUID.TUNING.getSegmentGranularity(),
+        windowPeriod = new Period(config.DRUID.TUNING.WINDOW_PERIOD),
+        partitions = config.DRUID.TUNING.PARTITIONS,
+        replicants = config.DRUID.TUNING.REPLICANTS))
       .buildBeam()
   }
+  
 }
